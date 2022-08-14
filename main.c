@@ -411,9 +411,9 @@ struct Node* upContact (struct Node *root)
       birth.year = y;
 
       updated->birth = birth;
-      if(strcmp(found->info->name, updated->name) == 0){
-        deleteNode(root, updated->name);
-        insert(root, updated);
+      if(strcmp(found->info->name, updated->name) != 0){
+        root = deleteNode(root, found->info->name);
+        root = insert(root, updated);
       }
      }  
      else{

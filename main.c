@@ -196,14 +196,19 @@ struct Node* queryNode(struct Node* root, char *key)
 {
 
 	struct Node *current = root;
+	strcpy(key, toUpperCase(key));
 
-  while(current && (strcmp(key,root->info->name)) != 0){
-    if( strcmp(key,current->info->name) > 0 )
+	while(current && (strcmp(key,root->info->name)) != 0){
+		if( strcmp(key,current->info->name) > 0 ){
 			current = current->right;
-		else
+		}
+		else if( strcmp(key,current->info->name) < 0 ){
 			current = current->left;
-	}
-  return current;
+		}else
+		{
+			return current;
+		}
+		}
 }
 
 
@@ -213,6 +218,8 @@ struct Node* queryNode(struct Node* root, char *key)
 struct Node* deleteNode(struct Node* root, char *key)
 {
 	// STEP 1: PERFORM STANDARD BST DELETE
+
+	strcpy(key, toUpperCase(key));
 
 	if (root == NULL)
 		return root;
@@ -403,7 +410,7 @@ void queryContact (struct Node *root)
      scanf(" %s", key);
 
      struct Node *found = queryNode(root, key);
-     found? printInfo(found->info) : printf("Nao foi encontrado\n");
+     found!=NULL? printInfo(found->info) : printf("Nao foi encontrado!\n");
 }
 
 // Permite a atualização dos dados de um contato da agenda

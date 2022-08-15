@@ -322,16 +322,12 @@ void inOrder(struct Node *n)
 	inOrder(n->right);
 }
 
-void printPosOrderInFile(struct Node *n, FILE *file)
+void printPreOrderInFile(struct Node *n, FILE *file)
 {
 	if (n==NULL) return;
-	
-	printPosOrderInFile(n->right, file);
-		fwrite(n->info, sizeof(Contact), 1, file);
-
-	printPosOrderInFile(n->left, file);
-
-
+	fwrite(n->info, sizeof(Contact), 1, file);
+	printPreOrderInFile(n->left, file);
+	printPreOrderInFile(n->right, file);
 
 }
 
@@ -450,20 +446,16 @@ struct Node* upContact (struct Node *root)
 
 struct Node* insertFromFile(struct Node* root){
 	Contact *c = (Contact*)malloc(sizeof(Contact));
-	//Contact c;
-	FILE *file = fopen("agenda.dat", "rb");
+	FILE *file = fopen("agenda.dat", "rb+");
 	if(file == NULL){
 		printf("Erro ao abrir arquivo"); 
 		return root;
 	} 
 
 	while(fread(c, sizeof(Contact),1,file)){
-		//printf("%s", c->name);
 		root = insert(root, c);
-		printInfo(root->info);
+		c = (Contact*)malloc(sizeof(Contact));
 	}
-	// printf("fora do whiel\n");
-	// inOrder(root->left);
 	
 	return root;
 
@@ -476,7 +468,7 @@ void saveToFile(struct Node *root){
 		printf("Erro ao abrir arquivo"); return;
 	} 
 
-	printPosOrderInFile(root, file);
+	printPreOrderInFile(root, file);
 }
 
 

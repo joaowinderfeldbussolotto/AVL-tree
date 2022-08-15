@@ -198,17 +198,16 @@ struct Node* queryNode(struct Node* root, char *key)
 	struct Node *current = root;
 	strcpy(key, toUpperCase(key));
 
-	while(current && (strcmp(key,root->info->name)) != 0){
+	while(current && (strcmp(key,current->info->name)) != 0){
 		if( strcmp(key,current->info->name) > 0 ){
 			current = current->right;
 		}
 		else if( strcmp(key,current->info->name) < 0 ){
 			current = current->left;
-		}else
-		{
-			return current;
 		}
+
 		}
+	return current;
 }
 
 
@@ -365,8 +364,10 @@ struct Node* insContact(struct Node *root)
      Contact *new = (Contact*)malloc(sizeof(Contact));
      printf("Informe o nome:\n ");
      scanf(" %s", new->name);
-	 if(queryNode(root, new->name) )
-	 	printf("Nome já existente\n"); return root; 
+	 if(queryNode(root, new->name)){
+	 	printf("Nome já existente\n");
+		return root; 
+	 }
      printf("\nInforme a data de nascimento: \n");
      scanf(" %d/%d/%d",&d,&m,&y);
      printf("Informe o email: \n");

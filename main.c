@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <ctype.h>
+
 
 typedef struct {
 	int day;
@@ -112,10 +114,20 @@ int getBalance(struct Node *N)
 	return height(N->left) - height(N->right);
 }
 
+char* toUpperCase(char* string)
+{
+	int i = 0;
+	  while(string[i]) {
+      string[i] =  (toupper(string[i]));
+      i++;
+   }
+	 return string;
+}
 struct Node* insert(struct Node* node, Contact *info)
 
 {
   //printInfo(info);
+	strcpy(info->name, toUpperCase(info->name));
 	/* 1. Perform the normal BST rotation */
 	if (node == NULL)
 		return(newNode(info));
@@ -310,6 +322,19 @@ void inOrder(struct Node *n)
 	inOrder(n->right);
 }
 
+void printPosOrderInFile(struct Node *n, FILE *file)
+{
+	if (n==NULL) return;
+	
+	printPosOrderInFile(n->right, file);
+		fwrite(n->info, sizeof(Contact), 1, file);
+
+	printPosOrderInFile(n->left, file);
+
+
+
+}
+
 
 #define EXIT 10  // valor fixo para a opção que finaliza a aplicação
 
@@ -411,15 +436,47 @@ struct Node* upContact (struct Node *root)
       birth.year = y;
 
       updated->birth = birth;
-      if(strcmp(found->info->name, updated->name) == 0){
-        deleteNode(root, updated->name);
-        insert(root, updated);
+      if(strcmp(found->info->name, updated->name) != 0){
+        root = deleteNode(root, found->info->name);
+        root = insert(root, updated);
       }
      }  
      else{
          printf("Nao foi encontrado\n");
      }
      return root;
+}
+
+
+struct Node* insertFromFile(struct Node* root){
+	Contact *c = (Contact*)malloc(sizeof(Contact));
+	//Contact c;
+	FILE *file = fopen("agenda.dat", "rb");
+	if(file == NULL){
+		printf("Erro ao abrir arquivo"); 
+		return root;
+	} 
+
+	while(fread(c, sizeof(Contact),1,file)){
+		//printf("%s", c->name);
+		root = insert(root, c);
+		printInfo(root->info);
+	}
+	// printf("fora do whiel\n");
+	// inOrder(root->left);
+	
+	return root;
+
+}
+
+void saveToFile(struct Node *root){
+
+	FILE *file = fopen("agenda.dat", "wb");
+	if(file == NULL){
+		printf("Erro ao abrir arquivo"); return;
+	} 
+
+	printPosOrderInFile(root, file);
 }
 
 
@@ -432,6 +489,8 @@ int main()
     int op=0;
     Contact MContact;
 
+		root = insertFromFile(root);
+
      while (op!=EXIT)
      {
           op=menu();
@@ -443,37 +502,11 @@ int main()
               case 4 : queryContact(root); break;
               case 5 : listContacts(root); 
               break;
-
           }
     }
 
-    //  Date birth;
-    //  birth.day = 5;
-    //  birth.month = 4;
-    //  birth.year = 2000;
-    //        Contact *c1 = malloc(sizeof(Contact));
+	
+	saveToFile(root);
 
-    //  Contact *c2 = malloc(sizeof(Contact));
-    //  Contact *c3 = malloc(sizeof(Contact));
-    
-    //  strcpy(c1->name, "Joao");
-
-    //  c1->birth = birth;
-    //  strcpy(c1->email,"ipjfedsiojf");
-    //  strcpy(c1->phone, "jlkwjsaf");
-    //  strcpy(c2->name, "Isa");
-    //  c1->birth = birth;
-    //  strcpy(c1->email,"ipjfedsiojf");
-    //  strcpy(c1->phone, "jlkwjsaf");
-    //  strcpy(c3->name, "Jacson");
-    //  c1->birth = birth;
-    //  strcpy(c1->email,"ipjfedsiojf");
-    //  strcpy(c1->phone, "jlkwjsaf");
-     
-
-    // root = insert(root, c1);
-    // root = insert(root, c2);
-    // root = insert(root, c3);
-
-    // inOrder(root);
+  
 }

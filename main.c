@@ -48,7 +48,7 @@ int height(struct Node *N)
 	return N->height;
 }
 
-// A utility function to get maximum of two strings
+// A utility function to get maximum of two integers
 int max(int a, int b)
 {
     return (a > b)? a : b;
@@ -59,8 +59,7 @@ int max(int a, int b)
 struct Node* newNode(Contact *info)
 {
 
-	struct Node* node = (struct Node*)
-						malloc(sizeof(struct Node));
+	struct Node* node = (struct Node*) malloc(sizeof(struct Node));
 	node->info = info;
 	node->left = NULL;
 	node->right = NULL;
@@ -136,7 +135,8 @@ struct Node* insert(struct Node* node, Contact *info)
 		node->left = insert(node->left, info);
 	else if (strcmp(info->name,node->info->name) > 0)
 		node->right = insert(node->right, info);
-	else // Equal keys not allowed
+	else 
+		printf("Nome ja existente\n");
 		return node;
 
 	/* 2. Update height of this ancestor node */
@@ -365,6 +365,8 @@ struct Node* insContact(struct Node *root)
      Contact *new = (Contact*)malloc(sizeof(Contact));
      printf("Informe o nome:\n ");
      scanf(" %s", new->name);
+	 if(queryNode(root, new->name) )
+	 	printf("Nome já existente\n"); return root; 
      printf("\nInforme a data de nascimento: \n");
      scanf(" %d/%d/%d",&d,&m,&y);
      printf("Informe o email: \n");
@@ -379,6 +381,7 @@ struct Node* insContact(struct Node *root)
 
      new->birth = birth;
      //printInfo(new);
+	 
      return insert(root, new);
 
 }

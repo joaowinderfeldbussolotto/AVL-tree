@@ -11,7 +11,6 @@ typedef struct {
 	int year;
 } Date;
 
-
 // Estrutura que contém os campos dos registros da agenda
 struct MREC {
        char name[30];
@@ -22,17 +21,16 @@ struct MREC {
 
 // Tipo criado para instanciar variaveis do tipo agenda
 typedef struct MREC Contact;
-// C program to delete a node from AVL Tree
 
-
-// An AVL tree node
-struct Node
+// Nó da árvore
+struct fNode
 {
   Contact *info;
 	int height;
-	struct Node *left;
-	struct Node *right;
+	struct fNode *left;
+	struct fNode *right;
 };
+typedef struct fNode Node;
 
 
 void printInfo(Contact *info){
@@ -40,81 +38,80 @@ void printInfo(Contact *info){
 }
 
 
-// A utility function to get height of the tree
-int height(struct Node *N)
+// Função que retorna a altura da árvore, utilizada quando é preciso usar a altura em outra parte do código
+int height(Node *N)
 {
 	if (N == NULL)
 		return 0;
 	return N->height;
 }
 
-// A utility function to get maximum of two integers
+// Função que retorna o máximo entre dois números inteiros
 int max(int a, int b)
 {
     return (a > b)? a : b;
 }
 
-/* Helper function that allocates a new node with the given key and
-	NULL left and right pointers. */
-struct Node* newNode(Contact *info)
+/* Função auxiliar pra adicionar um novo nó na árvore
+   com ponteiros nulos tanto left quanto right*/
+Node* newNode(Contact *info)
 {
 
-	struct Node* node = (struct Node*) malloc(sizeof(struct Node));
+	Node* node = (Node *) malloc(sizeof(Node));
 	node->info = info;
 	node->left = NULL;
 	node->right = NULL;
-	node->height = 1; // new node is initially added at leaf
+	node->height = 1;
 	return node;
 }
 
-// A utility function to right rotate subtree rooted with y
-// See the diagram given above.
-struct Node *rightRotate(struct Node *y)
+/*Função que rotaciona a subarvore para direita e retorna a nova raíz*/
+Node *rightRotate(Node *y)
 {
-	struct Node *x = y->left;
-	struct Node *T2 = x->right;
+	Node *x = y->left;
+	Node *T2 = x->right;
 
-	// Perform rotation
+	//Executa a rotação
 	x->right = y;
 	y->left = T2;
 
-	// Update heights
+	//Atualiza a altura
 	y->height = max(height(y->left), height(y->right))+1;
 	x->height = max(height(x->left), height(x->right))+1;
 
-	// Return new root
+	//Retorna a nova raíz
 	return x;
 }
 
-// A utility function to left rotate subtree rooted with x
-// See the diagram given above.
-struct Node *leftRotate(struct Node *x)
+//Função que rotaciona a subarvore para a esquerda e retorna a nova raíz
+Node *leftRotate(Node *x)
 {
-	struct Node *y = x->right;
-	struct Node *T2 = y->left;
+	Node *y = x->right;
+	Node *T2 = y->left;
 
-	// Perform rotation
+	//Executa a rotação
 	y->left = x;
 	x->right = T2;
 
-	// Update heights
+	//Atualiza a altura
 	x->height = max(height(x->left), height(x->right))+1;
 	y->height = max(height(y->left), height(y->right))+1;
 
-	// Return new root
+	//Retorna nova raíz
 	return y;
 }
 
-// Get Balance factor of node N
-int getBalance(struct Node *N)
+//Função que acha o balanceamento da árvore
+int getBalance(Node *N)
 {
 	if (N == NULL)
 		return 0;
 	return height(N->left) - height(N->right);
 }
 
-char* toUpperCase(char* string)
-{
+/*Função que transforma a string em uma string feita totalmente 
+  em letras maiusculas, usada depois para as comparações entre os nomes*/
+char* toUpperCase(char* string){
 	int i = 0;
 	  while(string[i]) {
       string[i] =  (toupper(string[i]));
@@ -122,10 +119,8 @@ char* toUpperCase(char* string)
    }
 	 return string;
 }
-struct Node* insert(struct Node* node, Contact *info)
 
-{
-  //printInfo(info);
+Node* insert(Node* node, Contact *info){
 	strcpy(info->name, toUpperCase(info->name));
 	/* 1. Perform the normal BST rotation */
 	if (node == NULL)
@@ -139,63 +134,60 @@ struct Node* insert(struct Node* node, Contact *info)
 		printf("Nome ja existente\n");
 		return node;
 
-	/* 2. Update height of this ancestor node */
+	/*Atualiza a altura do nó anterior*/
 	node->height = 1 + max(height(node->left),
 						height(node->right));
 
-	/* 3. Get the balance factor of this ancestor
-		node to check whether this node became
-		unbalanced */
+	/*Pega a altura do nó anterior para verificar se 
+	  a arvore está balanceada ou não*/
 	int balance = getBalance(node);
 
-	// If this node becomes unbalanced, then there are 4 cases
+	//Se ela não estiver balanceada há 4 casos possíveis
 
-	// Left Left Case
+	//1 -> Caso LL(Left Left)
 	if (balance > 1 && strcmp(info->name,node->left->info->name) < 0)
 		return rightRotate(node);
 
-	// Right Right Case
+	//2 -> Caso RR(Right Right)
 	if (balance < -1 && strcmp(info->name,node->right->info->name) > 0)
 		return leftRotate(node);
 
-	// Left Right Case
+	//3 -> Caso LR(Left Right)
 	if (balance > 1 && strcmp(info->name,node->left->info->name) > 0)
 	{
 		node->left = leftRotate(node->left);
 		return rightRotate(node);
 	}
 
-	// Right Left Case
+	//4 -> Caso RL(Right Left)
 	if (balance < -1 && strcmp(info->name,node->right->info->name) < 0)
 	{
 		node->right = rightRotate(node->right);
 		return leftRotate(node);
 	}
-
-	/* return the (unchanged) node pointer */
+	//retorna o ponteiro
 	return node;
 }
 
-/* Given a non-empty binary search tree, return the
-node with minimum key value found in that tree.
-Note that the entire tree does not need to be
-searched. */
-struct Node * minValueNode(struct Node* node)
+/*Percorre a lista a esquerda atrás do ponteiro com menor valor,
+  no caso do trabalho procura o nome com menor valor em ordem alfabetica
+  */
+Node * minValueNode(Node* node)
 {
-	struct Node* current = node;
+	Node* current = node;
 
-	/* loop down to find the leftmost leaf */
+	/*um laço para percorrer a arvore para a esquerda, assim achando o nó
+	  que tem o menor valor*/
 	while (current->left != NULL)
 		current = current->left;
-
+	//retorna o node
 	return current;
-
 }
 
-struct Node* queryNode(struct Node* root, char *key)
+Node* queryNode(Node* root, char *key)
 {
 
-	struct Node *current = root;
+	Node *current = root;
 	strcpy(key, toUpperCase(key));
 
 	while(current && (strcmp(key,current->info->name)) != 0){
@@ -214,51 +206,49 @@ struct Node* queryNode(struct Node* root, char *key)
 // Recursive function to delete a node with given key
 // from subtree with given root. It returns root of
 // the modified subtree.
-struct Node* deleteNode(struct Node* root, char *key)
+Node* deleteNode(Node* root, char *key)
 {
 	// STEP 1: PERFORM STANDARD BST DELETE
-
+	//recebe o nome e transforma no mesmo em caixa alta
 	strcpy(key, toUpperCase(key));
 
 	if (root == NULL)
 		return root;
 
-	// If the key to be deleted is smaller than the
-	// root's key, then it lies in left subtree
+	/*Verifica se o valor é menor que o do nó atual (ordem alfabética), caso sim,
+	  vai para a esquerda*/
 	if ( strcmp(key,root->info->name) < 0)
 		root->left = deleteNode(root->left, key);
 
-	// If the key to be deleted is greater than the
-	// root's key, then it lies in right subtree
+	/*Verifica se o valor é maior que o do nó atual (ordem alfabética), caso sim,
+	  vai para a direita*/
 	else if( strcmp(key,root->info->name) > 0)
 		root->right = deleteNode(root->right, key);
 
-	// if key is same as root's key, then This is
-	// the node to be deleted
+	//Se o valor(nome) for igual ao valor(nome) presente no nó, então é o nó a ser deletado
 	else
 	{
-		// node with only one child or no child
+		//nós com apenas um filho ou nenhum filho
 		if( (root->left == NULL) || (root->right == NULL) )
 		{
-			struct Node *temp = root->left ? root->left :
+			Node *temp = root->left ? root->left :
 											root->right;
 
-			// No child case
+			//caso 1: nenhum filho
 			if (temp == NULL)
 			{
 				temp = root;
 				root = NULL;
 			}
-			else // One child case
-			*root = *temp; // Copy the contents of
-							// the non-empty child
+			else //caso 2: um filho apenas
+			*root = *temp; //copia o conteúdo do filho
 			free(temp);
 		}
 		else
 		{
 			// node with two children: Get the inorder
 			// successor (smallest in the right subtree)
-			struct Node* temp = minValueNode(root->right);
+			Node* temp = minValueNode(root->right);
 
 			// Copy the inorder successor's data to this node
 			root->info = temp->info;
@@ -307,10 +297,8 @@ struct Node* deleteNode(struct Node* root, char *key)
 	return root;
 }
 
-// A utility function to print preorder traversal of
-// the tree.
-// The function also prints height of every node
-void preOrder(struct Node *root)
+//Função pra printar a árvore em Pre Order
+void preOrder(Node *root)
 {
 	if(root != NULL)
 	{
@@ -320,7 +308,7 @@ void preOrder(struct Node *root)
 	}
 }
 
-void inOrder(struct Node *n)
+void inOrder(Node *n)
 {
 	if (n==NULL) return;
 	inOrder(n->left);
@@ -328,7 +316,7 @@ void inOrder(struct Node *n)
 	inOrder(n->right);
 }
 
-void printPreOrderInFile(struct Node *n, FILE *file)
+void printPreOrderInFile(Node *n, FILE *file)
 {
 	if (n==NULL) return;
 	fwrite(n->info, sizeof(Contact), 1, file);
@@ -337,11 +325,8 @@ void printPreOrderInFile(struct Node *n, FILE *file)
 
 }
 
-
-#define EXIT 10  // valor fixo para a opção que finaliza a aplicação
-
-//Struct que representa a data.
-
+// valor fixo para a opção que finaliza a aplicação
+#define EXIT 10
 
 // Apresenta o menu da aplicação e retorna a opção selecionada
 int menu()
@@ -358,7 +343,7 @@ int menu()
 }
 
 // Permite o cadastro de um contato
-struct Node* insContact(struct Node *root)
+Node* insContact(Node *root)
 {
      int d,m,y;
      Contact *new = (Contact*)malloc(sizeof(Contact));
@@ -388,7 +373,7 @@ struct Node* insContact(struct Node *root)
 }
 
 // Permite excluir um contato da agenda
-struct Node* delContact (struct Node *root)
+Node* delContact (Node *root)
 {    
      char key[40];
      printf("Informe o nome: \n");
@@ -400,31 +385,31 @@ struct Node* delContact (struct Node *root)
 }
 
 // Lista o conteudo da agenda (todos os campos)
-void listContacts (struct Node *root)
+void listContacts (Node *root)
 {
      inOrder(root);
      printf("\n");
 }
 
 // Permite consultar um contato da agenda por nome
-void queryContact (struct Node *root)
+void queryContact (Node *root)
 {
     char key[40];
      printf("Informe o nome que deseja buscar:\n");
      scanf(" %s", key);
 
-     struct Node *found = queryNode(root, key);
+     Node *found = queryNode(root, key);
      found!=NULL? printInfo(found->info) : printf("Nao foi encontrado!\n");
 }
 
 // Permite a atualização dos dados de um contato da agenda
-struct Node* upContact (struct Node *root)
+Node* upContact (Node *root)
 {
      char key[40];
      printf("Informe o nome que deseja atualizar:\n");
      scanf(" %s", key);
 
-     struct Node *found = queryNode(root, key);
+     Node *found = queryNode(root, key);
      if(found){
       Contact *updated = malloc(sizeof(Contact));
       int d,m,y;
@@ -455,7 +440,7 @@ struct Node* upContact (struct Node *root)
 }
 
 
-struct Node* insertFromFile(struct Node* root){
+Node* insertFromFile(Node* root){
 	Contact *c = (Contact*)malloc(sizeof(Contact));
 	FILE *file = fopen("agenda.dat", "rb+");
 	if(file == NULL){
@@ -472,7 +457,7 @@ struct Node* insertFromFile(struct Node* root){
 
 }
 
-void saveToFile(struct Node *root){
+void saveToFile(Node *root){
 
 	FILE *file = fopen("agenda.dat", "wb");
 	if(file == NULL){
@@ -487,7 +472,7 @@ void saveToFile(struct Node *root){
 // Programa principal
 int main()
 {
-  struct Node *root = NULL;
+  Node *root = NULL;
 	
     int op=0;
     Contact MContact;

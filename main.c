@@ -1,11 +1,8 @@
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
 #include <locale.h>
-
-
 
 typedef struct {
 	int day;
@@ -33,6 +30,9 @@ struct fNode
 	struct fNode *right;
 };
 typedef struct fNode Node;
+
+// valor fixo para a opção que finaliza a aplicação
+#define EXIT 10
 
 
 void printInfo(Contact *info){
@@ -131,9 +131,10 @@ Node* insert(Node* node, Contact *info){
 		node->left = insert(node->left, info);
 	else if (strcmp(info->name,node->info->name) > 0)
 		node->right = insert(node->right, info);
-	else 
+	else {
 		printf("Nome ja existente\n");
 		return node;
+        }
 
 	/*Atualiza a altura do nó anterior*/
 	node->height = 1 + max(height(node->left),
@@ -204,12 +205,10 @@ Node* queryNode(Node* root, char *key)
 }
 
 
-// Recursive function to delete a node with given key
-// from subtree with given root. It returns root of
-// the modified subtree.
+// Função para deletar. Retorna raiz da subarvore modificada 
+
 Node* deleteNode(Node* root, char *key)
 {
-	// STEP 1: PERFORM STANDARD BST DELETE
 	//recebe o nome e transforma no mesmo em caixa alta
 	strcpy(key, toUpperCase(key));
 
@@ -244,51 +243,52 @@ Node* deleteNode(Node* root, char *key)
 			else //caso 2: um filho apenas
 			*root = *temp; //copia o conteúdo do filho
 			free(temp);
+
 		}
 		else
 		{
-			// node with two children: Get the inorder
-			// successor (smallest in the right subtree)
+			// Nó com dois filhos, pega o sucessor inorder (menor da subarvore)
 			Node* temp = minValueNode(root->right);
 
-			// Copy the inorder successor's data to this node
+			// Copia os dados do  sucessor(in order) para o nó atual 
 			root->info = temp->info;
 
-			// Delete the inorder successor
+			// Apaga
 			root->right = deleteNode(root->right, temp->info->name);
 		}
 	}
-
-	// If the tree had only one node then return
+    
+	// Caso só tem um nó, entao retorna
 	if (root == NULL)
 	return root;
 
-	// STEP 2: UPDATE HEIGHT OF THE CURRENT NODE
+    //BALANCEAMENTO::
+
+	// Atualiza altura do nó atual
 	root->height = 1 + max(height(root->left),
 						height(root->right));
 
-	// STEP 3: GET THE BALANCE FACTOR OF THIS NODE (to
-	// check whether this node became unbalanced)
+
 	int balance = getBalance(root);
 
-	// If this node becomes unbalanced, then there are 4 cases
+	// Se estiver desbalanceado
 
-	// Left Left Case
+	// Caso LL
 	if (balance > 1 && getBalance(root->left) >= 0)
 		return rightRotate(root);
 
-	// Left Right Case
+	// Caso LR
 	if (balance > 1 && getBalance(root->left) < 0)
 	{
 		root->left = leftRotate(root->left);
 		return rightRotate(root);
 	}
 
-	// Right Right Case
+	// Caso RR
 	if (balance < -1 && getBalance(root->right) <= 0)
 		return leftRotate(root);
 
-	// Right Left Case
+	// Caso RL
 	if (balance < -1 && getBalance(root->right) > 0)
 	{
 		root->right = rightRotate(root->right);
@@ -326,8 +326,7 @@ void printPreOrderInFile(Node *n, FILE *file)
 
 }
 
-// valor fixo para a opção que finaliza a aplicação
-#define EXIT 10
+
 
 // Apresenta o menu da aplicação e retorna a opção selecionada
 int menu()
@@ -367,7 +366,6 @@ Node* insContact(Node *root)
      birth.year = y;
 
      new->birth = birth;
-     //printInfo(new);
 	 
      return insert(root, new);
 
@@ -446,7 +444,7 @@ Node* insertFromFile(Node* root){
 	FILE *file = fopen("agenda.dat", "rb+");
 	if(file == NULL){
 		//printf("Erro ao abrir arquivo"); 
-		FILE *file = fopen("agenda.dat", "wb+");
+		file = fopen("agenda.dat", "wb+");
 
 	} 
 
@@ -476,9 +474,7 @@ int main()
 {
 	Node *root = NULL;
 	setlocale(LC_ALL, "Portuguese");
-
     int op=0;
-    Contact MContact;
 	root = insertFromFile(root);
      while (op!=EXIT)
      {
@@ -489,13 +485,10 @@ int main()
               case 2 : root = delContact(root); break;
               case 3 : root = upContact(root); break;
               case 4 : queryContact(root); break;
-              case 5 : listContacts(root); 
-              break;
+              case 5 : listContacts(root); break;
+              default: printf("Valor invalido\n");
           }
     }
-
-	
 	saveToFile(root);
 
-  
 }

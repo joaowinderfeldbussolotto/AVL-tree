@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
+#include <locale.h>
+
 
 
 typedef struct {
@@ -472,13 +474,12 @@ void saveToFile(Node *root){
 // Programa principal
 int main()
 {
-  Node *root = NULL;
-	
+	Node *root = NULL;
+	setlocale(LC_ALL, "Portuguese");
+
     int op=0;
     Contact MContact;
-
-		root = insertFromFile(root);
-
+	root = insertFromFile(root);
      while (op!=EXIT)
      {
           op=menu();

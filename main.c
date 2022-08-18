@@ -101,7 +101,7 @@ Node *leftRotate(Node *x)
 	return y;
 }
 
-//Função que acha o balanceamento da árvore
+//Função que acha o fator balanceamento da árvore
 int getBalance(Node *N)
 {
 	if (N == NULL)
@@ -122,7 +122,6 @@ char* toUpperCase(char* string){
 
 Node* insert(Node* node, Contact *info){
 	strcpy(info->name, toUpperCase(info->name));
-	/* 1. Perform the normal BST rotation */
 	if (node == NULL)
 		return(newNode(info));
 
@@ -444,8 +443,9 @@ Node* insertFromFile(Node* root){
 	Contact *c = (Contact*)malloc(sizeof(Contact));
 	FILE *file = fopen("agenda.dat", "rb+");
 	if(file == NULL){
-		printf("Erro ao abrir arquivo"); 
-		return root;
+		//printf("Erro ao abrir arquivo"); 
+		FILE *file = fopen("agenda.dat", "wb+");
+
 	} 
 
 	while(fread(c, sizeof(Contact),1,file)){
